@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/01 09:48:19 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/01 22:28:02 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,8 @@ void	free_arr(char **arr, size_t size);
 #ifndef M_PI
 # define M_PI 3.14159265358979323846
 #endif
+
+#define KEY_PRESS_DISTANCE 0.5f
 
 #define PLAYER_X 4
 #define PLAYER_Y 4
@@ -261,22 +263,9 @@ float	calc_distance(t_game *game, float angle)
 		}
 	}
 
-	// Last wall square
-	draw_square(game, check_x * 50, check_y * 50, 50, 0x0,
-		0x0022dd00);
-	draw_square(game, check_x * 50 + 1, check_y * 50 + 1, 48,
-		0x0, 0x0022dd00);
-	draw_square(game, check_x * 50 + 2, check_y * 50 + 2, 46,
-		0x00999977, 0x00999977);
-
 	// Last intersection
 	draw_square(game, (int)(pos.x * 50) - 2, (int)(pos.y * 50) - 2, 3,
 		0x00ff00ff, 0x0);
-
-	// printf("Found wall(%d, %d) at (%f, %f)\n", check_x, check_y, pos.x, pos.y);
-	// printf("distance=%f\n", distance);
-
-	XFlush(((t_xvar *)game->mlx.mlx_ptr)->display);
 
 	return (distance);
 }
@@ -322,6 +311,34 @@ int	get_map(char *path, t_game *game)
 	return (0);
 }
 
+int	move_player(t_game *game, int keysym)
+{
+	// game->player.x;
+	if (keysym == D_KEY || keysym == RIGHT_ARROW_KEY)
+		game->player.x += KEY_PRESS_DISTANCE;
+	if (keysym == A_KEY || keysym == LEFT_ARROW_KEY)
+		game->player.x -= KEY_PRESS_DISTANCE;
+	if (keysym == S_KEY || keysym == DOWN_ARROW_KEY)
+		game->player.y += KEY_PRESS_DISTANCE;
+	if (keysym == W_KEY || keysym == UP_ARROW_KEY)
+		game->player.y -= KEY_PRESS_DISTANCE;
+	return (0);
+}
+
+int	on_keypress(int keysym, t_game *game)
+{
+	if (keysym == Q_KEY || keysym == ESC_KEY)
+		on_destroy(game);
+	if (!is_control_key(keysym))
+		return (0);
+	move_player(game, keysym);
+	draw_map(game);
+	for (float i = 0; i < 361; i += 1)
+	{
+		calc_distance(game, fmod(i, 360.0));
+	}
+	return (0);
+}
 
 int main(int argc, char const *argv[])
 {
@@ -351,9 +368,9 @@ int main(int argc, char const *argv[])
 	for (float i = 0; i < 361; i += 0.25)
 	{
 		calc_distance(&game, fmod(i, 360.0));
-		usleep(3 * 1000);
 	}
 
+	mlx_key_hook(game.mlx.win_ptr, on_keypress, &game);
 	mlx_hook(game.mlx.win_ptr, 17, 0, on_destroy, &game);
 	mlx_loop(game.mlx.mlx_ptr);
 
