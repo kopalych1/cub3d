@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/01 08:52:23 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/01 09:48:19 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -155,20 +155,25 @@ double	dist(t_point p1, t_point p2)
 */
 float	calc_distance(t_game *game, float angle)
 {
-	// TODO: 90 180 270 360 deg angles
 	float			distance;
 	const short		dx_sign = 1 - (2 * (angle <= 90 || angle >= 270));
 	const short		dy_sign = 1 - (2 * (angle >= 180));
-	const float		dx = dx_sign * tanf(M_PI / 180 * angle);
-	const float		dy = dy_sign * tanf(M_PI / 180 * (90 - angle));
+	float			dx = dx_sign * tanf(M_PI / 180 * angle);
+	float			dy = dy_sign * tanf(M_PI / 180 * (90 - angle));
 	const t_point	pos0 = {game->player.x, game->player.y};
 	t_point			pos;
 
 	pos.x = game->player.x;
 	pos.y = game->player.y;
 
-	int	next_x = ((dy > 0) * ((int)pos.x + 1)) + (!(dy > 0) * (ceil(pos.x) - 1));
-	int	next_y = ((dx > 0) * ((int)pos.y + 1)) + (!(dx > 0) * (ceil(pos.y) - 1));
+	if (fabs(fmod(angle, 90)) < 0.000002f)
+	{
+		dx = (angle > 269 && angle < 271) - (angle > 89 && angle < 91);
+		dy = (angle >= 0 && angle < 1) - (angle > 179 && angle < 181);
+	}
+
+	int	next_x = ((dy > 0) * ((int)pos.x + 1)) + (!(dy >= 0) * (ceil(pos.x) - 1));
+	int	next_y = ((dx > 0) * ((int)pos.y + 1)) + (!(dx >= 0) * (ceil(pos.y) - 1));
 
 	distance = 0;
 
@@ -179,7 +184,6 @@ float	calc_distance(t_game *game, float angle)
 
 	while (1)
 	{
-		// printf("-------------------------------------------\n");
 		t_point	intersection_x;
 		t_point	intersection_y;
 
@@ -255,9 +259,6 @@ float	calc_distance(t_game *game, float angle)
 
 			intersection_type = 2;
 		}
-
-		// XFlush(((t_xvar *)game->mlx.mlx_ptr)->display);
-		usleep(5 * 1000);
 	}
 
 	// Last wall square
@@ -347,10 +348,10 @@ int main(int argc, char const *argv[])
 	draw_map(&game);
 	print_map(&game);
 
-	for (float i = 0; i < 361; i += 1)
+	for (float i = 0; i < 361; i += 0.25)
 	{
-		if (((int)i % 90 != 0))
-			calc_distance(&game, i);
+		calc_distance(&game, fmod(i, 360.0));
+		usleep(3 * 1000);
 	}
 
 	mlx_hook(game.mlx.win_ptr, 17, 0, on_destroy, &game);
