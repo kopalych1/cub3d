@@ -6,7 +6,7 @@
 /*   By: vcaratti <vcaratti@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 12:48:42 by vcaratti          #+#    #+#             */
-/*   Updated: 2025/03/19 13:17:48 by vcaratti         ###   ########.fr       */
+/*   Updated: 2025/04/02 11:37:57 by vcaratti         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,8 @@ typedef struct s_node
 
 typedef struct s_cub_data
 {
-	bool	map_closed;
+	int	fd;
+	int	map_status;
 	t_node	*map_start;
 	char	*SO_texture;
 	char	*NO_texture;
@@ -36,7 +37,6 @@ typedef struct s_cub_data
 
 typedef struct s_processing
 {
-	int	fd;
 	int	(*processes[3](char *line, t_cub_data *cub_data));
 
 }	t_processing;
