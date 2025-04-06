@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/01 22:28:02 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/06 02:21:28 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,8 @@ void	free_arr(char **arr, size_t size);
 #endif
 
 #define KEY_PRESS_DISTANCE 0.5f
+
+#define PLAYER_WITDH 0.1
 
 #define PLAYER_X 4
 #define PLAYER_Y 4
@@ -128,6 +130,22 @@ void	draw_square(t_game *game, const int x, const int y,
 	}
 }
 
+/**
+ * @brief	Constrains a number to be within a range
+ * 
+ * @param	x The number to constrain.
+ * @param	a The lower end of the range.
+ * @param	b The upper end of the range.
+ */
+int	constrain(int x, int a, int b)
+{
+	if (x < a)
+		return (a);
+	if (x > b)
+		return (b);
+	return (x);
+}
+
 void	draw_wall(t_game *game, const int x, const int y)
 {
 	draw_square(game, x * 50, y * 50, 50, 0x00999977, 0x007700a8);
@@ -194,17 +212,14 @@ float	calc_distance(t_game *game, float angle)
 		intersection_y.x = pos0.x + dy * fabs(pos0.y - next_y);
 		intersection_y.y = next_y;
 
-		// printf("pos.x=%f\n", pos.x);
-		// printf("pos.y=%f\n", pos.y);
-
 		// Red dot of intersection
 		draw_square(game, (int)(pos.x * 50) - 2, (int)(pos.y * 50) - 2, 3,
 			0x00dd0000, 0x0);
 
 		if (intersection_type == 3)
 		{
-			check_x = (int)pos.x - (dy < 0);
-			check_y = (int)pos.y - (dx < 0) + ((dy < 0) && (dx > 0));
+			check_x = round(pos.x) - (dy < 0);
+			check_y = round(pos.y) - (dx < 0);
 		}
 		else if (intersection_type == 1)
 		{
@@ -222,6 +237,14 @@ float	calc_distance(t_game *game, float angle)
 			else
 				check_y = (int)pos.y - 1;
 		}
+
+		check_x = constrain(check_x, 0, game->map_width - 1);
+		check_y = constrain(check_y, 0, game->map_height - 1);
+
+		// Highlights the wall checked
+		// if (intersection_type)
+		// 	draw_square(game, check_x * 50, check_y * 50, 50, 0, 0x00ff00ff);
+
 		if (intersection_type && (game->map[check_y][check_x] == '1'))
 			break ;
 
@@ -313,15 +336,22 @@ int	get_map(char *path, t_game *game)
 
 int	move_player(t_game *game, int keysym)
 {
-	// game->player.x;
 	if (keysym == D_KEY || keysym == RIGHT_ARROW_KEY)
-		game->player.x += KEY_PRESS_DISTANCE;
+	{
+		game->player.x += fmin(calc_distance(game, 0) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
+	}
 	if (keysym == A_KEY || keysym == LEFT_ARROW_KEY)
-		game->player.x -= KEY_PRESS_DISTANCE;
+	{
+		game->player.x -= fmin(calc_distance(game, 180) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
+	}
 	if (keysym == S_KEY || keysym == DOWN_ARROW_KEY)
-		game->player.y += KEY_PRESS_DISTANCE;
+	{
+		game->player.y += fmin(calc_distance(game, 270) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
+	}
 	if (keysym == W_KEY || keysym == UP_ARROW_KEY)
-		game->player.y -= KEY_PRESS_DISTANCE;
+	{
+		game->player.y -= fmin(calc_distance(game, 90) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
+	}
 	return (0);
 }
 
@@ -370,7 +400,7 @@ int main(int argc, char const *argv[])
 		calc_distance(&game, fmod(i, 360.0));
 	}
 
-	mlx_key_hook(game.mlx.win_ptr, on_keypress, &game);
+	mlx_hook(game.mlx.win_ptr, ON_KEYDOWN, KeyPressMask, on_keypress, &game);
 	mlx_hook(game.mlx.win_ptr, 17, 0, on_destroy, &game);
 	mlx_loop(game.mlx.mlx_ptr);
 
