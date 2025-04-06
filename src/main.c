@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/06 02:21:28 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/06 05:21:18 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,6 +22,7 @@ void	free_arr(char **arr, size_t size);
 #endif
 
 #define KEY_PRESS_DISTANCE 0.5f
+#define KEY_TURN_RATE 15.0f
 
 #define PLAYER_WITDH 0.1
 
@@ -68,7 +69,7 @@ void	print_map(t_game *game)
 			else if (((game->player.x - 0.5f) >= j && (game->player.x - 0.5f) < (j + 1))
 				&& ((game->player.y - 0.5f) >= i && (game->player.y - 0.5f) < (i + 1))
 			)
-				printf("%s ", angle_str(PLAYER_ANGLE));
+				printf("%s ", angle_str(game->player.angle));
 			else
 				printf("%c ", game->map[i][j]);
 		}
@@ -336,21 +337,29 @@ int	get_map(char *path, t_game *game)
 
 int	move_player(t_game *game, int keysym)
 {
-	if (keysym == D_KEY || keysym == RIGHT_ARROW_KEY)
+	if (keysym == D_KEY)
 	{
 		game->player.x += fmin(calc_distance(game, 0) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
 	}
-	if (keysym == A_KEY || keysym == LEFT_ARROW_KEY)
+	if (keysym == A_KEY)
 	{
 		game->player.x -= fmin(calc_distance(game, 180) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
 	}
-	if (keysym == S_KEY || keysym == DOWN_ARROW_KEY)
+	if (keysym == S_KEY)
 	{
 		game->player.y += fmin(calc_distance(game, 270) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
 	}
-	if (keysym == W_KEY || keysym == UP_ARROW_KEY)
+	if (keysym == W_KEY)
 	{
 		game->player.y -= fmin(calc_distance(game, 90) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
+	}
+	if (keysym == LEFT_ARROW_KEY)
+	{
+		game->player.angle = fmod(game->player.angle + KEY_TURN_RATE, 360.0);
+	}
+	if (keysym == RIGHT_ARROW_KEY)
+	{
+		game->player.angle = fmod(game->player.angle - KEY_TURN_RATE + 360.0, 360.0);
 	}
 	return (0);
 }
@@ -363,7 +372,15 @@ int	on_keypress(int keysym, t_game *game)
 		return (0);
 	move_player(game, keysym);
 	draw_map(game);
-	for (float i = 0; i < 361; i += 1)
+
+	const float	start_angle = (game->player.angle - (FOV / 2) + 360);
+	const float	end_angle = (game->player.angle + (FOV / 2) + 360);
+
+	for (
+		float i = start_angle;
+		i < end_angle;
+		i += 1
+	)
 	{
 		calc_distance(game, fmod(i, 360.0));
 	}
@@ -380,6 +397,7 @@ int main(int argc, char const *argv[])
 	game.map = NULL;
 	player.x = PLAYER_X;
 	player.y = PLAYER_Y;
+	player.angle = PLAYER_ANGLE;
 	game.player = player;
 
 	game.mlx.mlx_ptr = mlx_init();
@@ -400,7 +418,7 @@ int main(int argc, char const *argv[])
 		calc_distance(&game, fmod(i, 360.0));
 	}
 
-	mlx_hook(game.mlx.win_ptr, ON_KEYDOWN, KeyPressMask, on_keypress, &game);
+	mlx_hook(game.mlx.win_ptr, KeyPress, KeyPressMask, on_keypress, &game);
 	mlx_hook(game.mlx.win_ptr, 17, 0, on_destroy, &game);
 	mlx_loop(game.mlx.mlx_ptr);
 
