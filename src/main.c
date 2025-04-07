@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/06 05:21:18 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/07 14:26:23 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,12 +14,15 @@
 
 void	free_arr(char **arr, size_t size);
 
-#define SCREEN_WIDTH 800
-#define SCREEN_HEIGHT 600
+#define SCREEN_WIDTH 1600
+#define SCREEN_HEIGHT 800
 
 #ifndef M_PI
 # define M_PI 3.14159265358979323846
 #endif
+
+#define WALL_HEIGHT 150
+#define TEXT_RES 100
 
 #define KEY_PRESS_DISTANCE 0.5f
 #define KEY_TURN_RATE 15.0f
@@ -91,6 +94,56 @@ int	put_pixel(t_xvar *xvar, t_win_list *win,
 }
 
 /**
+ * @brief	Draws a rectangle in the game window.
+ *
+ * @param	game         Pointer to the game structure.
+ * @param	x            X-coordinate of the top-left corner of the rectangle.
+ * @param	y            Y-coordinate of the top-left corner of the rectangle.
+ * @param	width        Length of the rectangle's horisontal side.
+ * @param	height       Length of the rectangle's vertical side.
+ * @param	color        Fill color of the rectangle.
+ * @param	border_color Border color of the rectangle (0 if no border is needed).
+ */
+void	draw_rect(t_game *game, const int x, const int y,
+	const int width, const int height,
+	unsigned int color, unsigned int border_color)
+{
+	const t_xvar		*xvar = game->mlx.mlx_ptr;
+	const t_win_list	*win = game->mlx.win_ptr;
+	XGCValues			xgcv1;
+	XGCValues			xgcv2;
+	unsigned int		curr_color = 0;
+
+	xgcv1.foreground = mlx_int_get_good_color(xvar, color);
+	if (border_color)
+		xgcv2.foreground = mlx_int_get_good_color(xvar, border_color);
+	for (int i = y; i < y + height; i++)
+	{
+		for (int j = x; j < x + width; j++)
+		{
+			if (border_color
+				&& ((i == y) || (j == x)
+					|| (i == (y + height - 1)) || (j == (x + width - 1))))
+			{
+				if (!curr_color || (curr_color != border_color))
+				{
+					curr_color = border_color;
+					XChangeGC(xvar->display, win->gc, GCForeground, &xgcv2);
+				}
+				XDrawPoint(xvar->display, win->window, win->gc, j, i);
+				continue;
+			}
+			if (!curr_color || (curr_color != color))
+			{
+				curr_color = color;
+				XChangeGC(xvar->display, win->gc, GCForeground, &xgcv1);
+			}
+			XDrawPoint(xvar->display, win->window, win->gc, j, i);
+		}
+	}
+}
+
+/**
  * @brief	Draws a square in the game window.
  *
  * @param	game         Pointer to the game structure.
@@ -103,32 +156,7 @@ int	put_pixel(t_xvar *xvar, t_win_list *win,
 void	draw_square(t_game *game, const int x, const int y,
 	const int side, unsigned int color, unsigned int border_color)
 {
-	t_xvar		*xvar = game->mlx.mlx_ptr;
-	t_win_list	*win = game->mlx.win_ptr;
-	XGCValues	xgcv1;
-	XGCValues	xgcv2;
-
-	xgcv1.foreground = mlx_int_get_good_color(xvar, color);
-	if (border_color)
-		xgcv2.foreground = mlx_int_get_good_color(xvar, border_color);
-	for (int i = y; i < y + side; i++)
-	{
-		for (int j = x; j < x + side; j++)
-		{
-			if (border_color
-				&& ((i == y) || (j == x)
-					|| (i == (y + side - 1)) || (j == (x + side - 1))))
-			{
-				XChangeGC(xvar->display, win->gc, GCForeground, &xgcv2);
-				XDrawPoint(xvar->display, win->window, win->gc, j, i);
-			}
-			else
-			{
-				XChangeGC(xvar->display, win->gc, GCForeground, &xgcv1);
-				XDrawPoint(xvar->display, win->window, win->gc, j, i);
-			}
-		}
-	}
+	draw_rect(game, x, y, side, side, color, border_color);
 }
 
 /**
@@ -335,6 +363,24 @@ int	get_map(char *path, t_game *game)
 	return (0);
 }
 
+void	render(t_game *game)
+{
+	const float	start_angle = (game->player.angle - (FOV / 2) + 360);
+	const float	angle_step = (float)FOV / ((float)SCREEN_WIDTH / 2);
+	float		distance;
+
+	draw_square(game, SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, 0x00ffffff, 0x00ffffff);
+	for (int i = 0; i < SCREEN_WIDTH / 2; i += round(100 / TEXT_RES))
+	{
+		distance = calc_distance(game, fmod(start_angle + (i * angle_step), 360.0));
+		draw_rect(game,
+			1600 - i, round(400 - (WALL_HEIGHT / distance)),
+			round(100 / TEXT_RES), (WALL_HEIGHT / distance) * 2,
+			0x0, 0x0);
+	}
+	XFlush(((t_xvar *)game->mlx.mlx_ptr)->display);
+}
+
 int	move_player(t_game *game, int keysym)
 {
 	if (keysym == D_KEY)
@@ -372,18 +418,7 @@ int	on_keypress(int keysym, t_game *game)
 		return (0);
 	move_player(game, keysym);
 	draw_map(game);
-
-	const float	start_angle = (game->player.angle - (FOV / 2) + 360);
-	const float	end_angle = (game->player.angle + (FOV / 2) + 360);
-
-	for (
-		float i = start_angle;
-		i < end_angle;
-		i += 1
-	)
-	{
-		calc_distance(game, fmod(i, 360.0));
-	}
+	render(game);
 	return (0);
 }
 
