@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:55:52 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/06 02:23:26 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/09 20:29:07 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,10 +21,40 @@
 # include <stdio.h>
 # include <math.h>
 
+/* ========== Math ========== */
+
+typedef struct s_game	t_game;
+
+typedef struct s_point
+{
+	double	x;
+	double	y;
+}	t_point;
+
+typedef struct s_wall_math
+{
+	double		dx;
+	double		dy;
+	t_game		*game;
+	t_point		pos;
+	int			next_x;
+	int			next_y;
+	short		intersection_type;
+	t_point		inter_x;
+	t_point		inter_y;
+}	t_wall_math;
+
+int		constrain(int x, int a, int b);
+double	dist(t_point p1, t_point p2);
+t_point	wall_inter(t_game *game, const t_point pos0, double angle);
+
+# ifndef M_PI
+#  define M_PI 3.14159265358979323846
+# endif
+
 typedef struct s_player
 {
-	float	x;
-	float	y;
+	t_point	pos;
 	float	angle;
 }	t_player;
 
@@ -42,12 +72,6 @@ typedef struct s_game
 	t_player	player;
 	t_mlx		mlx;
 }	t_game;
-
-typedef struct s_point
-{
-	double	x;
-	double	y;
-}	t_point;
 
 enum e_mlx_events
 {
