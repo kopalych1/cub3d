@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/07 14:26:23 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/09 17:54:39 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -383,21 +383,26 @@ void	render(t_game *game)
 
 int	move_player(t_game *game, int keysym)
 {
+	//TODO: Wall collision
 	if (keysym == D_KEY)
 	{
-		game->player.x += fmin(calc_distance(game, 0) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
+		game->player.x -= cos(M_PI / 180 * (game->player.angle + 90)) * KEY_PRESS_DISTANCE;
+		game->player.y += sin(M_PI / 180 * (game->player.angle + 90)) * KEY_PRESS_DISTANCE;
 	}
 	if (keysym == A_KEY)
 	{
-		game->player.x -= fmin(calc_distance(game, 180) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
+		game->player.x -= cos(M_PI / 180 * (game->player.angle - 90)) * KEY_PRESS_DISTANCE;
+		game->player.y += sin(M_PI / 180 * (game->player.angle - 90)) * KEY_PRESS_DISTANCE;
 	}
 	if (keysym == S_KEY)
 	{
-		game->player.y += fmin(calc_distance(game, 270) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
+		game->player.x -= cos(M_PI / 180 * game->player.angle) * KEY_PRESS_DISTANCE;
+		game->player.y += sin(M_PI / 180 * game->player.angle) * KEY_PRESS_DISTANCE;
 	}
 	if (keysym == W_KEY)
 	{
-		game->player.y -= fmin(calc_distance(game, 90) - PLAYER_WITDH, KEY_PRESS_DISTANCE);
+		game->player.x += cos(M_PI / 180 * game->player.angle) * KEY_PRESS_DISTANCE;
+		game->player.y -= sin(M_PI / 180 * game->player.angle) * KEY_PRESS_DISTANCE;
 	}
 	if (keysym == LEFT_ARROW_KEY)
 	{
