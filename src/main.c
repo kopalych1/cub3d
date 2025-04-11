@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/09 20:29:31 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/11 15:06:33 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ void	free_arr(char **arr, size_t size);
 #define SCREEN_WIDTH 1600
 #define SCREEN_HEIGHT 800
 
-#define WALL_HEIGHT 150
+#define WALL_HEIGHT 200
 #define TEXT_RES 100
 
 #define KEY_PRESS_DISTANCE 0.5f
@@ -29,7 +29,7 @@ void	free_arr(char **arr, size_t size);
 #define PLAYER_Y 4
 #define PLAYER_ANGLE 90.0
 
-#define FOV 90
+#define FOV 60
 
 void	exit_game(t_game *game)
 {
@@ -112,6 +112,8 @@ void	draw_rect(t_game *game, const int x, const int y,
 	XGCValues			xgcv2;
 	unsigned int		curr_color = 0;
 
+	if ((x < 0) || (y < 0) || (width < 0) || (height < 0))
+		return ;
 	xgcv1.foreground = mlx_int_get_good_color(xvar, color);
 	if (border_color)
 		xgcv2.foreground = mlx_int_get_good_color(xvar, border_color);
@@ -205,16 +207,23 @@ int	get_map(char *path, t_game *game)
 
 void	render(t_game *game)
 {
-	const float	start_angle = (game->player.angle - (FOV / 2) + 360);
-	const float	angle_step = (float)FOV / ((float)SCREEN_WIDTH / 2);
-	float		distance;
+	const double	start_angle = (game->player.angle - (FOV / 2) + 360);
+	const double	angle_step = (float)FOV / ((float)SCREEN_WIDTH / 2);
+	double			distance;
+	double			ray_angle;
 
 	draw_square(game, SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, 0x00ffffff, 0x00ffffff);
 	for (int i = 0; i < SCREEN_WIDTH / 2; i += round(100 / TEXT_RES))
 	{
-		distance = dist(game->player.pos, wall_inter(game, game->player.pos, fmod(start_angle + (i * angle_step), 360.0)));
+		ray_angle = fmod(start_angle + (i * angle_step), 360.0);
+		distance = dist(
+			game->player.pos,
+			wall_inter(game, game->player.pos, ray_angle));
+		distance *= cos(M_PI / 180 * (ray_angle - game->player.angle));
 		draw_rect(game,
-			1600 - i, round(400 - (WALL_HEIGHT / distance)),
+			SCREEN_WIDTH - i, constrain(
+				round((SCREEN_HEIGHT / 2) - (WALL_HEIGHT / distance)),
+				0, SCREEN_HEIGHT),
 			round(100 / TEXT_RES), (WALL_HEIGHT / distance) * 2,
 			0x0, 0x0);
 	}
