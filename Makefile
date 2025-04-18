@@ -6,7 +6,7 @@
 #    By: akostian <akostian@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/10 14:47:56 by akostian          #+#    #+#              #
-#    Updated: 2025/04/09 18:11:27 by akostian         ###   ########.fr        #
+#    Updated: 2025/04/19 01:00:43 by akostian         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -19,7 +19,9 @@ SRC_DIR					= src
 SRCS					= main.c \
 						  is_control_key.c \
 						  utils.c \
-						  wall_inter.c
+						  wall_inter.c wall_direction.c \
+						  get_pixel_color.c \
+						  load_tex.c
 
 INC_DIR					= include
 INCLUDES				= -I$(INC_DIR)
@@ -44,7 +46,7 @@ UNAME		= $(shell uname -s)
 ifeq ($(UNAME), Linux)
 	MLX_DIR				= minilibx-linux
 	MLX_FLAGS			= -L$(MLX_DIR) -lmlx -L/usr/lib/X11 -lXext -lX11
-	MLX_C_INC			= -I/usr/include -Imlx_linux -O3
+	MLX_C_INC			= -I/usr/include -Imlx_linux -O3 
 	MLX_LIB				= $(MLX_DIR)/libmlx_Linux.a
 
 # MLX FLAGS FOR MACOS

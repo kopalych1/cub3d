@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/07 15:31:42 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/09 19:19:53 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/19 01:20:39 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,6 +118,8 @@ t_point	wall_inter(t_game *game, const t_point pos0, double angle)
 		m.inter_x.y = pos0.y + m.dx * fabs(pos0.x - m.next_x);
 		m.inter_y.x = pos0.x + m.dy * fabs(pos0.y - m.next_y);
 		m.inter_y.y = m.next_y;
+		draw_square(game,
+			(int)(m.pos.x * 50), (int)(m.pos.y * 50), 1, 0x00dd0000, 0x0);
 		if (check_wall(&m))
 			break ;
 		next_inter(&m);

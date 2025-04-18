@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/11 15:06:33 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/19 01:23:47 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ void	free_arr(char **arr, size_t size);
 #define SCREEN_WIDTH 1600
 #define SCREEN_HEIGHT 800
 
-#define WALL_HEIGHT 200
+#define WALL_HEIGHT 350
 #define TEXT_RES 100
 
 #define KEY_PRESS_DISTANCE 0.5f
@@ -33,6 +33,14 @@ void	free_arr(char **arr, size_t size);
 
 void	exit_game(t_game *game)
 {
+	if (game->tex.n_wall)
+		mlx_destroy_image(game->mlx.mlx_ptr, game->tex.n_wall);
+	if (game->tex.s_wall)
+		mlx_destroy_image(game->mlx.mlx_ptr, game->tex.s_wall);
+	if (game->tex.w_wall)
+		mlx_destroy_image(game->mlx.mlx_ptr, game->tex.w_wall);
+	if (game->tex.e_wall)
+		mlx_destroy_image(game->mlx.mlx_ptr, game->tex.e_wall);
 	free_arr(game->map, game->map_height);
 	mlx_destroy_window(game->mlx.mlx_ptr, game->mlx.win_ptr);
 	mlx_destroy_display(game->mlx.mlx_ptr);
@@ -205,27 +213,55 @@ int	get_map(char *path, t_game *game)
 	return (0);
 }
 
+/**
+ * @brief Calculates the wall position offset for texture mapping.
+ * 
+ * @param p   The point on the wall.
+ * @param dir The direction of the wall (NORTH, SOUTH, EAST, or WEST).
+ * 
+ * @return The fractional offset of the point along the wall.
+ */
+double	wall_pos(t_point p, enum e_direction dir)
+{
+	if (dir == NORTH || dir == SOUTH)
+		return (ceil(p.x) - p.x);
+	return (ceil(p.y) - p.y);
+}
+
+static void	put_wall_segment(
+	t_game *game, double ray_angle, t_point inter, int i
+)
+{
+	const double	distance = dist(game->player.pos, inter)
+		* cos(M_PI / 180 * (ray_angle - game->player.angle));
+	int				tex_x;
+	int				tex_y;
+	int				wall_height;
+
+	wall_height = constrain(round(WALL_HEIGHT / distance), 0, SCREEN_HEIGHT);
+	for (int j = 0; j < wall_height; j++)
+	{
+		tex_x = wall_pos(inter, wall_direction(inter, ray_angle)) * TEX_WIDTH;
+		tex_y = floor((double)j / (double)wall_height * (double)TEX_HEIGHT);
+		put_pixel(game->mlx.mlx_ptr, game->mlx.win_ptr,
+			SCREEN_WIDTH - i, (SCREEN_HEIGHT / 2) - (wall_height / 2) + j,
+			get_pixel_color(game->tex.n_wall, tex_x, tex_y));
+	}
+}
+
 void	render(t_game *game)
 {
 	const double	start_angle = (game->player.angle - (FOV / 2) + 360);
 	const double	angle_step = (float)FOV / ((float)SCREEN_WIDTH / 2);
-	double			distance;
 	double			ray_angle;
 
 	draw_square(game, SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, 0x00ffffff, 0x00ffffff);
 	for (int i = 0; i < SCREEN_WIDTH / 2; i += round(100 / TEXT_RES))
 	{
 		ray_angle = fmod(start_angle + (i * angle_step), 360.0);
-		distance = dist(
-			game->player.pos,
-			wall_inter(game, game->player.pos, ray_angle));
-		distance *= cos(M_PI / 180 * (ray_angle - game->player.angle));
-		draw_rect(game,
-			SCREEN_WIDTH - i, constrain(
-				round((SCREEN_HEIGHT / 2) - (WALL_HEIGHT / distance)),
-				0, SCREEN_HEIGHT),
-			round(100 / TEXT_RES), (WALL_HEIGHT / distance) * 2,
-			0x0, 0x0);
+		put_wall_segment(game, ray_angle,
+			wall_inter(game, game->player.pos, ray_angle), i
+		);
 	}
 	XFlush(((t_xvar *)game->mlx.mlx_ptr)->display);
 }
@@ -298,6 +334,8 @@ int main(int argc, char const *argv[])
 
 	draw_map(&game);
 	print_map(&game);
+
+	load_tex(&game);
 
 	mlx_hook(game.mlx.win_ptr, KeyPress, KeyPressMask, on_keypress, &game);
 	mlx_hook(game.mlx.win_ptr, 17, 0, on_destroy, &game);
