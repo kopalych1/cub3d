@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/19 01:23:47 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/27 04:32:41 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -33,14 +33,7 @@ void	free_arr(char **arr, size_t size);
 
 void	exit_game(t_game *game)
 {
-	if (game->tex.n_wall)
-		mlx_destroy_image(game->mlx.mlx_ptr, game->tex.n_wall);
-	if (game->tex.s_wall)
-		mlx_destroy_image(game->mlx.mlx_ptr, game->tex.s_wall);
-	if (game->tex.w_wall)
-		mlx_destroy_image(game->mlx.mlx_ptr, game->tex.w_wall);
-	if (game->tex.e_wall)
-		mlx_destroy_image(game->mlx.mlx_ptr, game->tex.e_wall);
+	destroy_tex(game);
 	free_arr(game->map, game->map_height);
 	mlx_destroy_window(game->mlx.mlx_ptr, game->mlx.win_ptr);
 	mlx_destroy_display(game->mlx.mlx_ptr);
@@ -229,23 +222,25 @@ double	wall_pos(t_point p, enum e_direction dir)
 }
 
 static void	put_wall_segment(
-	t_game *game, double ray_angle, t_point inter, int i
+	t_game *game, t_draw_math *m, int i
 )
 {
-	const double	distance = dist(game->player.pos, inter)
-		* cos(M_PI / 180 * (ray_angle - game->player.angle));
-	int				tex_x;
-	int				tex_y;
-	int				wall_height;
-
-	wall_height = constrain(round(WALL_HEIGHT / distance), 0, SCREEN_HEIGHT);
-	for (int j = 0; j < wall_height; j++)
+	m->distance = dist(game->player.pos, m->inter)
+		* cos(M_PI / 180 * (m->ray_angle - game->player.angle));
+	m->wall_height = round(WALL_HEIGHT / m->distance);
+	for (int j = 0; j < m->wall_height; j++)
 	{
-		tex_x = wall_pos(inter, wall_direction(inter, ray_angle)) * TEX_WIDTH;
-		tex_y = floor((double)j / (double)wall_height * (double)TEX_HEIGHT);
+		m->screen_x = SCREEN_WIDTH - i;
+		m->screen_y = (SCREEN_HEIGHT - m->wall_height) / 2 + j;
+		if ((m->screen_y <= 0)
+			|| (m->screen_y > SCREEN_HEIGHT))
+			continue;
+		m->dir = wall_direction(m->inter, m->ray_angle);
+		m->tex_x = wall_pos(m->inter, m->dir) * game->tex[m->dir].width;
+		m->tex_y = floor((double)j / (double)m->wall_height * (double)game->tex[m->dir].height);
 		put_pixel(game->mlx.mlx_ptr, game->mlx.win_ptr,
-			SCREEN_WIDTH - i, (SCREEN_HEIGHT / 2) - (wall_height / 2) + j,
-			get_pixel_color(game->tex.n_wall, tex_x, tex_y));
+			m->screen_x, m->screen_y,
+			get_pixel_color(game->tex[m->dir].p, m->tex_x, m->tex_y));
 	}
 }
 
@@ -253,15 +248,15 @@ void	render(t_game *game)
 {
 	const double	start_angle = (game->player.angle - (FOV / 2) + 360);
 	const double	angle_step = (float)FOV / ((float)SCREEN_WIDTH / 2);
-	double			ray_angle;
+	t_draw_math		m;
 
-	draw_square(game, SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, 0x00ffffff, 0x00ffffff);
+	draw_rect(game, SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0x0087CEFA, 0);
+	draw_rect(game, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0x00D4F1F4, 0);
 	for (int i = 0; i < SCREEN_WIDTH / 2; i += round(100 / TEXT_RES))
 	{
-		ray_angle = fmod(start_angle + (i * angle_step), 360.0);
-		put_wall_segment(game, ray_angle,
-			wall_inter(game, game->player.pos, ray_angle), i
-		);
+		m.ray_angle = fmod(start_angle + (i * angle_step), 360.0);
+		m.inter = wall_inter(game, game->player.pos, m.ray_angle);
+		put_wall_segment(game, &m, i);
 	}
 	XFlush(((t_xvar *)game->mlx.mlx_ptr)->display);
 }
@@ -335,7 +330,8 @@ int main(int argc, char const *argv[])
 	draw_map(&game);
 	print_map(&game);
 
-	load_tex(&game);
+	if (load_tex(&game))
+		return (exit_game(&game), 1);
 
 	mlx_hook(game.mlx.win_ptr, KeyPress, KeyPressMask, on_keypress, &game);
 	mlx_hook(game.mlx.win_ptr, 17, 0, on_destroy, &game);

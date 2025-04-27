@@ -6,23 +6,38 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:05:42 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/19 01:16:47 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/27 04:31:58 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/cub3d.h"
 
+void	destroy_tex(t_game *game)
+{
+	if (game->tex[NORTH].p)
+		mlx_destroy_image(game->mlx.mlx_ptr, game->tex[NORTH].p);
+	if (game->tex[SOUTH].p)
+		mlx_destroy_image(game->mlx.mlx_ptr, game->tex[SOUTH].p);
+	if (game->tex[WEST].p)
+		mlx_destroy_image(game->mlx.mlx_ptr, game->tex[WEST].p);
+	if (game->tex[EAST].p)
+		mlx_destroy_image(game->mlx.mlx_ptr, game->tex[EAST].p);
+}
+
 int	load_tex(t_game *game)
 {
-	game->tex.width = TEX_WIDTH;
-	game->tex.height = TEX_HEIGHT;
-	game->tex.n_wall = mlx_xpm_file_to_image(game->mlx.mlx_ptr,
-			"textures/brick_wall_64x64.xpm",
-			&game->tex.width, &game->tex.height);
-	if (!game->tex.n_wall)
-		return (1);
-	game->tex.s_wall = NULL;
-	game->tex.w_wall = NULL;
-	game->tex.e_wall = NULL;
+	const char	*paths[] = {"textures/brick_wall_64x64.xpm", "textures/brick_wall_64x64.xpm", "textures/red-brick-wall-texture.xpm", "textures/white-brick-wall-texture.xpm"};
+	int			i;
+
+	i = -1;
+	ft_memset(game->tex, 0, sizeof(game->tex));
+	while (++i < 4)
+	{
+		game->tex[i].p = mlx_xpm_file_to_image(game->mlx.mlx_ptr,\
+				(char *)paths[i],
+				&(game->tex[i].width), &(game->tex[i].height));
+		if (!game->tex[i].p)
+			return (1);
+	}
 	return (0);
 }

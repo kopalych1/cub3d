@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:55:52 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/19 01:17:34 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/27 04:30:26 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,14 @@
 
 # include <stdio.h>
 # include <math.h>
+
+enum e_direction
+{
+	NORTH,
+	SOUTH,
+	WEST,
+	EAST
+};
 
 /* ========== Math ========== */
 
@@ -44,6 +52,19 @@ typedef struct s_wall_math
 	t_point		inter_x;
 	t_point		inter_y;
 }	t_wall_math;
+
+typedef struct s_draw_math
+{
+	double				ray_angle;
+	t_point				inter;
+	double				distance;
+	int					tex_x;
+	int					tex_y;
+	int					screen_x;
+	int					screen_y;
+	enum e_direction	dir;
+	int					wall_height;
+}	t_draw_math;
 
 int					constrain(int x, int a, int b);
 double				dist(t_point p1, t_point p2);
@@ -69,15 +90,12 @@ typedef struct s_mlx
 # define TEX_WIDTH 64
 # define TEX_HEIGHT 64
 
-typedef struct s_textures
+typedef struct s_tex
 {
-	void	*n_wall;
-	void	*s_wall;
-	void	*w_wall;
-	void	*e_wall;
+	void	*p;
 	int		width;
 	int		height;
-}	t_textures;
+}	t_tex;
 
 typedef struct s_game
 {
@@ -86,7 +104,7 @@ typedef struct s_game
 	int			map_height;
 	t_player	player;
 	t_mlx		mlx;
-	t_textures	tex;
+	t_tex		tex[4];
 }	t_game;
 
 enum e_mlx_events
@@ -100,16 +118,10 @@ enum e_mlx_events
 	ON_DESTROY = 17
 };
 
-enum e_direction
-{
-	NORTH,
-	SOUTH,
-	WEST,
-	EAST
-};
-
 int					load_tex(t_game *game);
 unsigned int		get_pixel_color(t_img *img, int x, int y);
+
+void				destroy_tex(t_game *game);
 
 int					is_control_key(int keysym);
 

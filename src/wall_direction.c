@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/15 19:10:27 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/19 01:15:02 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/26 05:24:51 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,13 +22,19 @@
  */
 enum e_direction	wall_direction(t_point pos, double angle)
 {
+	const unsigned char		is_corner = ((pos.x - floor(pos.x)) < 0.000002f)
+		&& ((pos.y - floor(pos.y)) < 0.000002f);
+	static enum e_direction	previous_dir;
+
+	if (is_corner)
+		return (previous_dir);
 	if ((pos.x - floor(pos.x)) < 0.000002f)
 	{
 		if (angle > 90 && angle < 270)
-			return (EAST);
-		return (WEST);
+			return (previous_dir = EAST, EAST);
+		return (previous_dir = WEST, WEST);
 	}
 	if (angle > 0 && angle < 180)
-		return (SOUTH);
-	return (NORTH);
+		return (previous_dir = SOUTH, SOUTH);
+	return (previous_dir = NORTH, NORTH);
 }
