@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:55:52 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/27 04:30:26 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/28 05:09:16 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -39,6 +39,21 @@ typedef struct s_point
 	double	x;
 	double	y;
 }	t_point;
+
+typedef struct s_rect
+{
+	int		x;		// X-coordinate of the top-left corner of the rectangle.
+	int		y;		// Y-coordinate of the top-left corner of the rectangle.
+	int		width;	// Length of the rectangle's horisontal side.
+	int		height;	// Length of the rectangle's vertical side.
+}	t_rect;
+
+typedef struct s_square
+{
+	int		x;		// X-coordinate of the top-left corner of the square.
+	int		y;		// Y-coordinate of the top-left corner of the square.
+	int		side;	// Length of the square's side.
+}	t_square;
 
 typedef struct s_wall_math
 {
@@ -105,6 +120,7 @@ typedef struct s_game
 	t_player	player;
 	t_mlx		mlx;
 	t_tex		tex[4];
+	t_img		*screen;
 }	t_game;
 
 enum e_mlx_events
@@ -125,8 +141,12 @@ void				destroy_tex(t_game *game);
 
 int					is_control_key(int keysym);
 
-void				draw_square(t_game *game, const int x, const int y,
-						const int side,
+void				draw_flush(t_game *game);
+void				draw_pixel(t_img *screen, const int x, const int y,
+						unsigned int color);
+void				draw_rect(t_img *screen, t_rect rect,
+						unsigned int color, unsigned int border_color);
+void				draw_square(t_img *screen, t_square sq,
 						unsigned int color, unsigned int border_color);
 
 #endif

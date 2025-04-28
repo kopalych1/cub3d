@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/27 04:32:41 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/28 05:09:16 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,6 +34,7 @@ void	free_arr(char **arr, size_t size);
 void	exit_game(t_game *game)
 {
 	destroy_tex(game);
+	mlx_destroy_image(game->mlx.mlx_ptr, game->screen);
 	free_arr(game->map, game->map_height);
 	mlx_destroy_window(game->mlx.mlx_ptr, game->mlx.win_ptr);
 	mlx_destroy_display(game->mlx.mlx_ptr);
@@ -79,92 +80,6 @@ void	print_map(t_game *game)
 	}
 }
 
-#include "../minilibx-linux/mlx_int.h"
-
-int	put_pixel(t_xvar *xvar, t_win_list *win,
-		int x, int y, int color)
-{
-	XGCValues	xgcv;
-
-	xgcv.foreground = mlx_int_get_good_color(xvar, color);
-	XChangeGC(xvar->display, win->gc, GCForeground, &xgcv);
-	XDrawPoint(xvar->display, win->window, win->gc, x, y);
-	return (0);
-}
-
-/**
- * @brief	Draws a rectangle in the game window.
- *
- * @param	game         Pointer to the game structure.
- * @param	x            X-coordinate of the top-left corner of the rectangle.
- * @param	y            Y-coordinate of the top-left corner of the rectangle.
- * @param	width        Length of the rectangle's horisontal side.
- * @param	height       Length of the rectangle's vertical side.
- * @param	color        Fill color of the rectangle.
- * @param	border_color Border color of the rectangle (0 if no border is needed).
- */
-void	draw_rect(t_game *game, const int x, const int y,
-	const int width, const int height,
-	unsigned int color, unsigned int border_color)
-{
-	const t_xvar		*xvar = game->mlx.mlx_ptr;
-	const t_win_list	*win = game->mlx.win_ptr;
-	XGCValues			xgcv1;
-	XGCValues			xgcv2;
-	unsigned int		curr_color = 0;
-
-	if ((x < 0) || (y < 0) || (width < 0) || (height < 0))
-		return ;
-	xgcv1.foreground = mlx_int_get_good_color(xvar, color);
-	if (border_color)
-		xgcv2.foreground = mlx_int_get_good_color(xvar, border_color);
-	for (int i = y; i < y + height; i++)
-	{
-		for (int j = x; j < x + width; j++)
-		{
-			if (border_color
-				&& ((i == y) || (j == x)
-					|| (i == (y + height - 1)) || (j == (x + width - 1))))
-			{
-				if (!curr_color || (curr_color != border_color))
-				{
-					curr_color = border_color;
-					XChangeGC(xvar->display, win->gc, GCForeground, &xgcv2);
-				}
-				XDrawPoint(xvar->display, win->window, win->gc, j, i);
-				continue;
-			}
-			if (!curr_color || (curr_color != color))
-			{
-				curr_color = color;
-				XChangeGC(xvar->display, win->gc, GCForeground, &xgcv1);
-			}
-			XDrawPoint(xvar->display, win->window, win->gc, j, i);
-		}
-	}
-}
-
-/**
- * @brief	Draws a square in the game window.
- *
- * @param	game         Pointer to the game structure.
- * @param	x            X-coordinate of the top-left corner of the square.
- * @param	y            Y-coordinate of the top-left corner of the square.
- * @param	side         Length of the square's side.
- * @param	color        Fill color of the square.
- * @param	border_color Border color of the square (0 if no border is needed).
- */
-void	draw_square(t_game *game, const int x, const int y,
-	const int side, unsigned int color, unsigned int border_color)
-{
-	draw_rect(game, x, y, side, side, color, border_color);
-}
-
-void	draw_wall(t_game *game, const int x, const int y)
-{
-	draw_square(game, x * 50, y * 50, 50, 0x00999977, 0x007700a8);
-}
-
 void	draw_map(t_game *game)
 {
 	for (int i = 0; i < game->map_height; i++)
@@ -172,13 +87,19 @@ void	draw_map(t_game *game)
 		for (int j = 0; j < game->map_width; j++)
 		{
 			if (game->map[i][j] == '1')
-				draw_wall(game, j, i);
+				draw_square(game->screen, (t_square){j * 50, i * 50, 50},
+					0x00999977, 0x007700a8);
 			else
-				draw_square(game, j * 50, i * 50, 50, 0x0, 0x00333333);
+				draw_square(game->screen, (t_square){j * 50, i * 50, 50},
+					0, 0x00333333);
 		}
 	}
-	draw_square(game, game->player.pos.x * 50 - 3, game->player.pos.y * 50 - 3, 5, 0x0000ff00, 0x0000ff00);
-	XFlush(((t_xvar *)game->mlx.mlx_ptr)->display);
+	draw_square(game->screen,
+		(t_square){
+		game->player.pos.x * 50 - 3,
+		game->player.pos.y * 50 - 3,
+		5},
+		0x0000ff00, 0x0000ff00);
 }
 
 int	get_map(char *path, t_game *game)
@@ -238,7 +159,7 @@ static void	put_wall_segment(
 		m->dir = wall_direction(m->inter, m->ray_angle);
 		m->tex_x = wall_pos(m->inter, m->dir) * game->tex[m->dir].width;
 		m->tex_y = floor((double)j / (double)m->wall_height * (double)game->tex[m->dir].height);
-		put_pixel(game->mlx.mlx_ptr, game->mlx.win_ptr,
+		draw_pixel(game->screen,
 			m->screen_x, m->screen_y,
 			get_pixel_color(game->tex[m->dir].p, m->tex_x, m->tex_y));
 	}
@@ -250,15 +171,20 @@ void	render(t_game *game)
 	const double	angle_step = (float)FOV / ((float)SCREEN_WIDTH / 2);
 	t_draw_math		m;
 
-	draw_rect(game, SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0x0087CEFA, 0);
-	draw_rect(game, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2, 0x00D4F1F4, 0);
+	draw_rect(game->screen,
+		(t_rect){SCREEN_WIDTH / 2, 0, SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2},
+		0x0087CEFA, 0);
+	draw_rect(game->screen,
+		(t_rect){SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2,
+		SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2},
+		0x00D4F1F4, 0);
 	for (int i = 0; i < SCREEN_WIDTH / 2; i += round(100 / TEXT_RES))
 	{
 		m.ray_angle = fmod(start_angle + (i * angle_step), 360.0);
 		m.inter = wall_inter(game, game->player.pos, m.ray_angle);
 		put_wall_segment(game, &m, i);
 	}
-	XFlush(((t_xvar *)game->mlx.mlx_ptr)->display);
+	draw_flush(game);
 }
 
 int	move_player(t_game *game, int keysym)
@@ -323,15 +249,18 @@ int main(int argc, char const *argv[])
 	game.mlx.win_ptr = mlx_new_window(game.mlx.mlx_ptr, SCREEN_WIDTH, SCREEN_HEIGHT, "cub3d");
 	if (!game.mlx.win_ptr)
 		return (1);
+	game.screen = mlx_new_image(game.mlx.mlx_ptr, SCREEN_WIDTH, SCREEN_HEIGHT);
+	if (!game.screen)
+		return (exit_game(&game), 1);
+	if (load_tex(&game))
+		return (exit_game(&game), 1);
 
 	if (get_map("maps/map.cub", &game))
 		return (free_arr(game.map, game.map_height), printf("Map is not correct!\n"), 1);
 
 	draw_map(&game);
 	print_map(&game);
-
-	if (load_tex(&game))
-		return (exit_game(&game), 1);
+	render(&game);
 
 	mlx_hook(game.mlx.win_ptr, KeyPress, KeyPressMask, on_keypress, &game);
 	mlx_hook(game.mlx.win_ptr, 17, 0, on_destroy, &game);

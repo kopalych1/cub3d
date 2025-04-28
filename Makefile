@@ -6,7 +6,7 @@
 #    By: akostian <akostian@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/10 14:47:56 by akostian          #+#    #+#              #
-#    Updated: 2025/04/19 01:00:43 by akostian         ###   ########.fr        #
+#    Updated: 2025/04/28 01:48:52 by akostian         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -21,7 +21,8 @@ SRCS					= main.c \
 						  utils.c \
 						  wall_inter.c wall_direction.c \
 						  get_pixel_color.c \
-						  load_tex.c
+						  load_tex.c \
+						  draw.c
 
 INC_DIR					= include
 INCLUDES				= -I$(INC_DIR)
