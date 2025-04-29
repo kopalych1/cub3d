@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/28 01:47:18 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/28 05:09:16 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/29 20:52:07 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,7 +14,7 @@
 
 void	draw_flush(t_game *game)
 {
-	mlx_put_image_to_window(game->mlx.mlx_ptr, game->mlx.win_ptr,
+	mlx_put_image_to_window(game->mlx_ptr, game->win_ptr,
 		game->screen, 0, 0);
 }
 

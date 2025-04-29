@@ -6,16 +6,13 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:14:35 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/28 05:09:16 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/29 22:32:38 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../include/cub3d.h"
 
 void	free_arr(char **arr, size_t size);
-
-#define SCREEN_WIDTH 1600
-#define SCREEN_HEIGHT 800
 
 #define WALL_HEIGHT 350
 #define TEXT_RES 100
@@ -31,19 +28,23 @@ void	free_arr(char **arr, size_t size);
 
 #define FOV 60
 
-void	exit_game(t_game *game)
+void	free_game(t_game *game)
 {
 	destroy_tex(game);
-	mlx_destroy_image(game->mlx.mlx_ptr, game->screen);
-	free_arr(game->map, game->map_height);
-	mlx_destroy_window(game->mlx.mlx_ptr, game->mlx.win_ptr);
-	mlx_destroy_display(game->mlx.mlx_ptr);
-	free(game->mlx.mlx_ptr);
+	if (game->screen)
+		mlx_destroy_image(game->mlx_ptr, game->screen);
+	if (game->map)
+		free_arr(game->map, game->map_height);
+	if (game->win_ptr)
+		mlx_destroy_window(game->mlx_ptr, game->win_ptr);
+	if (game->mlx_ptr)
+		mlx_destroy_display(game->mlx_ptr);
+	free(game->mlx_ptr);
 }
 
 int	on_destroy(t_game *game)
 {
-	exit_game(game);
+	free_game(game);
 	exit(0);
 	return (0);
 }
@@ -100,31 +101,6 @@ void	draw_map(t_game *game)
 		game->player.pos.y * 50 - 3,
 		5},
 		0x0000ff00, 0x0000ff00);
-}
-
-int	get_map(char *path, t_game *game)
-{
-	const int	fd = open(path, O_RDONLY);
-	char		*line;
-	int			height;
-
-	height = 0;
-	line = get_next_line(fd);
-	game->map_width = ft_strlen(line) - (ft_strchr(line, '\n') != NULL);
-	while (line)
-	{
-		height++;
-		game->map_height++;
-		game->map = ft_realloc(game->map, (height - 1) * sizeof(char *),
-				height * sizeof(char *));
-		line[ft_strlen(line) - (ft_strchr(line, '\n') != NULL)] = '\0';
-		game->map[height - 1] = line;
-		if ((int)(ft_strlen(line) - (ft_strchr(line, '\n') != NULL))
-			!= game->map_width)
-			return (1);
-		line = get_next_line(fd);
-	}
-	return (0);
 }
 
 /**
@@ -233,41 +209,21 @@ int	on_keypress(int keysym, t_game *game)
 	return (0);
 }
 
-int main(int argc, char const *argv[])
+int	main(int argc, char const **argv)
 {
-	t_player	player = {{PLAYER_X, PLAYER_Y}, PLAYER_ANGLE};
-	t_game		game;
+	t_game	game;
 
-	game.map_width = 0;
-	game.map_height = 0;
-	game.map = NULL;
-	game.player = player;
-
-	game.mlx.mlx_ptr = mlx_init();
-	if (!game.mlx.mlx_ptr)
-		return (1);
-	game.mlx.win_ptr = mlx_new_window(game.mlx.mlx_ptr, SCREEN_WIDTH, SCREEN_HEIGHT, "cub3d");
-	if (!game.mlx.win_ptr)
-		return (1);
-	game.screen = mlx_new_image(game.mlx.mlx_ptr, SCREEN_WIDTH, SCREEN_HEIGHT);
-	if (!game.screen)
-		return (exit_game(&game), 1);
-	if (load_tex(&game))
-		return (exit_game(&game), 1);
-
-	if (get_map("maps/map.cub", &game))
-		return (free_arr(game.map, game.map_height), printf("Map is not correct!\n"), 1);
-
-	draw_map(&game);
+	if (init(&game))
+		return (ENOMEM);
+	game.player = (t_player){{PLAYER_X, PLAYER_Y}, PLAYER_ANGLE};
 	print_map(&game);
+	draw_map(&game);
 	render(&game);
-
-	mlx_hook(game.mlx.win_ptr, KeyPress, KeyPressMask, on_keypress, &game);
-	mlx_hook(game.mlx.win_ptr, 17, 0, on_destroy, &game);
-	mlx_loop(game.mlx.mlx_ptr);
-
+	mlx_hook(game.win_ptr, KeyPress, KeyPressMask, on_keypress, &game);
+	mlx_hook(game.win_ptr, DestroyNotify, NoEventMask, on_destroy, &game);
+	mlx_loop(game.mlx_ptr);
 	(void)argc;
 	(void)argv;
-	exit_game(&game);
+	free_game(&game);
 	return (0);
 }

@@ -6,7 +6,7 @@
 #    By: akostian <akostian@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/10 14:47:56 by akostian          #+#    #+#              #
-#    Updated: 2025/04/28 01:48:52 by akostian         ###   ########.fr        #
+#    Updated: 2025/04/29 22:21:33 by akostian         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -17,6 +17,7 @@ VPATH					= src
 
 SRC_DIR					= src
 SRCS					= main.c \
+						  init.c \
 						  is_control_key.c \
 						  utils.c \
 						  wall_inter.c wall_direction.c \

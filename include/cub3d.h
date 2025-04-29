@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:55:52 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/28 05:09:16 by akostian         ###   ########.fr       */
+/*   Updated: 2025/04/29 22:26:25 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -21,6 +21,10 @@
 
 # include <stdio.h>
 # include <math.h>
+# include <errno.h>
+
+#define SCREEN_WIDTH 1600
+#define SCREEN_HEIGHT 800
 
 enum e_direction
 {
@@ -96,12 +100,6 @@ typedef struct s_player
 	float	angle;
 }	t_player;
 
-typedef struct s_mlx
-{
-	void	*mlx_ptr;
-	void	*win_ptr;
-}	t_mlx;
-
 # define TEX_WIDTH 64
 # define TEX_HEIGHT 64
 
@@ -118,26 +116,19 @@ typedef struct s_game
 	int			map_width;
 	int			map_height;
 	t_player	player;
-	t_mlx		mlx;
+	void		*mlx_ptr;
+	void		*win_ptr;
 	t_tex		tex[4];
 	t_img		*screen;
 }	t_game;
 
-enum e_mlx_events
-{
-	ON_KEYDOWN = 2,
-	ON_KEYUP = 3,
-	ON_MOUSEDOWN = 4,
-	ON_MOUSEUP = 5,
-	ON_MOUSEMOVE = 6,
-	ON_EXPOSE = 12,
-	ON_DESTROY = 17
-};
+void				free_game(t_game *game);
+void				destroy_tex(t_game *game);
+
+int					init(t_game *game);
 
 int					load_tex(t_game *game);
 unsigned int		get_pixel_color(t_img *img, int x, int y);
-
-void				destroy_tex(t_game *game);
 
 int					is_control_key(int keysym);
 
