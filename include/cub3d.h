@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:55:52 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/29 22:26:25 by akostian         ###   ########.fr       */
+/*   Updated: 2025/05/02 06:22:53 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,14 @@
 # include <errno.h>
 
 #define SCREEN_WIDTH 1600
-#define SCREEN_HEIGHT 800
+#define SCREEN_HEIGHT 1000
+
+#define WALL_HEIGHT 500
+#define TEXT_RES 100
+#define FOV 60
+
+#define KEY_PRESS_DISTANCE 0.5f
+#define KEY_TURN_RATE 15.0f
 
 enum e_direction
 {
@@ -130,6 +137,9 @@ int					init(t_game *game);
 int					load_tex(t_game *game);
 unsigned int		get_pixel_color(t_img *img, int x, int y);
 
+void				render(t_game *game);
+
+int					move_player(t_game *game, int keysym);
 int					is_control_key(int keysym);
 
 void				draw_flush(t_game *game);
@@ -139,5 +149,7 @@ void				draw_rect(t_img *screen, t_rect rect,
 						unsigned int color, unsigned int border_color);
 void				draw_square(t_img *screen, t_square sq,
 						unsigned int color, unsigned int border_color);
+
+void				free_arr(char **arr, size_t size);
 
 #endif
