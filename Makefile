@@ -6,7 +6,7 @@
 #    By: akostian <akostian@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/10 14:47:56 by akostian          #+#    #+#              #
-#    Updated: 2025/05/02 06:10:25 by akostian         ###   ########.fr        #
+#    Updated: 2025/05/03 09:48:28 by akostian         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -35,9 +35,10 @@ LIBFT_DIR				= libft
 LIBFT					= $(LIBFT_DIR)/libft.a
 LOG_DIR					= logs
 OBJS					= $(addprefix $(BUILD_DIR)/, $(SRCS:%.c=%.o))
+DEPS					= $(OBJS:.o=.d)
 
 CC						= cc
-CFLAGS					= -Wall -Wextra -Werror -g3
+CFLAGS					= -Wall -Wextra -Werror -g3 -MMD
 
 NORMINETTE				= norminette
 NORMINETTE_FLAGS		= --use-gitignore
@@ -70,6 +71,9 @@ all: $(NAME)
 $(NAME): $(OBJS) $(LIBFT) $(MLX_LIB)
 	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) $(LIBFT) $(MLX_FLAGS) $(MLX_LIB) -o $(NAME) -lm
 #
+
+
+-include $(DEPS)
 
 
 $(BUILD_DIR):
@@ -116,7 +120,9 @@ fclean:
 #
 
 
-re: fclean all
+re:
+	@$(MAKE) fclean
+	@$(MAKE) all
 #
 
 
