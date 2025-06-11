@@ -27,13 +27,13 @@ void	destroy_tex(t_game *game)
 char	*get_next_texture(t_cub_data *cub_data, int i)
 {
 	if (i == 0)
-		return (cub_data->no_texture);
-	if (i == 1)
 		return (cub_data->so_texture);
+	if (i == 1)
+		return (cub_data->no_texture);
 	if (i == 2)
-		return (cub_data->we_texture);
-	if (i == 3)
 		return (cub_data->ea_texture);
+	if (i == 3)
+		return (cub_data->we_texture);
 	return (NULL);
 }
 
