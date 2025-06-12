@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:55:52 by akostian          #+#    #+#             */
-/*   Updated: 2025/06/11 12:27:09 by vcaratti         ###   ########.fr       */
+/*   Updated: 2025/06/12 10:47:59 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,6 +95,7 @@ typedef struct s_draw_math
 }	t_draw_math;
 
 int					constrain(int x, int a, int b);
+double				fconstrain(double x, double a, double b);
 double				dist(t_point p1, t_point p2);
 t_point				wall_inter(t_game *game, const t_point pos0, double angle);
 enum e_direction	wall_direction(t_point pos, double angle);

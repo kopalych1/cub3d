@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2024/07/21 17:38:13 by akostian          #+#    #+#             */
-/*   Updated: 2025/04/09 19:19:56 by akostian         ###   ########.fr       */
+/*   Updated: 2025/06/12 10:47:34 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,6 +20,15 @@
  * @param	b The upper end of the range.
  */
 int	constrain(int x, int a, int b)
+{
+	if (x < a)
+		return (a);
+	if (x > b)
+		return (b);
+	return (x);
+}
+
+double	fconstrain(double x, double a, double b)
 {
 	if (x < a)
 		return (a);

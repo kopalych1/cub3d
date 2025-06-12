@@ -1,8 +1,16 @@
+NO textures/brick_wall_64x64.xpm
+SO textures/brick_wall_64x64.xpm
+WE textures/red-brick-wall-texture.xpm
+EA textures/white-brick-wall-texture.xpm
+
+F 220,100,0
+C 0,50,30
+
 111111111
 100000111
 111000001
 100000001
-100000111
+10N000111
 100000001
 111110001
 100000001
