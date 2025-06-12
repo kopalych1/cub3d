@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.c                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcaratti <vcaratti@student.s19.be>         +#+  +:+       +#+        */
+/*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 12:49:09 by vcaratti          #+#    #+#             */
-/*   Updated: 2025/06/11 12:21:40 by vcaratti         ###   ########.fr       */
+/*   Updated: 2025/06/12 10:43:07 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -102,20 +102,21 @@ static int	parsing_routine(char *path, t_cub_data *cub_data, t_node *list_head)
 
 int	parsing(t_cub_data *cub_data, char *path)
 {
-	t_node	list_head;
+	t_node		list_head;
+	const char	*errors[] = {
+		"Error: Allocation error during parsing\n", // 1
+		"Error: Invalid map\n", // 2
+		"Error: Invalid player position\n", // 3
+		"Error: Invalid input file\n", // 4
+		"Error: No map\n" // 5
+	};
 
 	if (parsing_routine(path, cub_data, &list_head))
 	{
-		if (cub_data->error == 1)
-			write(2, "Error: Allocation error during parsing\n", 39);
-		else if (cub_data->error == 2)
-			write(2, "Error: Invalid map\n", 19);
-		else if (cub_data->error == 3)
-			write(2, "Error: Invalid player position\n", 31);
-		else if (cub_data->error == 4)
-			write(2, "Error: Invalid input file\n", 27);
-		else if (cub_data->error == 5)
-			write(2, "Error: No map\n", 14);
+		if (cub_data->error >= 1 && cub_data->error <= 5)
+			if (write(2, errors[cub_data->error - 1],
+					ft_strlen(errors[cub_data->error - 1])))
+				return (1);
 		free_all(&list_head, cub_data);
 	}
 	free_list(&list_head);

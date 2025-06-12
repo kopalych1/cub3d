@@ -6,7 +6,7 @@
 #    By: akostian <akostian@student.s19.be>         +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/02/10 14:47:56 by akostian          #+#    #+#              #
-#    Updated: 2025/06/10 14:44:53 by vcaratti         ###   ########.fr        #
+#    Updated: 2025/06/12 10:44:40 by akostian         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
@@ -47,7 +47,7 @@ OBJS					= $(addprefix $(BUILD_DIR)/, $(SRCS:%.c=%.o))
 DEPS					= $(OBJS:.o=.d)
 
 CC						= cc
-CFLAGS					= -Wall -Wextra -Werror -g3 -MMD -fsanitize=address
+CFLAGS					= -Wall -Wextra -Werror -g3 -MMD -O3
 
 NORMINETTE				= norminette
 NORMINETTE_FLAGS		= --use-gitignore
