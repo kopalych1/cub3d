@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser_tools.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcaratti <vcaratti@student.s19.be>         +#+  +:+       +#+        */
+/*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 12:49:09 by vcaratti          #+#    #+#             */
-/*   Updated: 2025/06/10 13:57:08 by vcaratti         ###   ########.fr       */
+/*   Updated: 2025/06/12 13:51:38 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -74,23 +74,7 @@ int	*line_to_int_arr(char *line, int width)
 
 void	init_data(t_cub_data *c, t_node *map_head, t_node *list_head)
 {
-	c->error = 0;
-	c->so_texture = NULL;
-	c->no_texture = NULL;
-	c->we_texture = NULL;
-	c->ea_texture = NULL;
-	c->ceiling_rgb[0] = 0;
-	c->ceiling_rgb[1] = 0;
-	c->ceiling_rgb[2] = 0;
-	c->floor_rgb[0] = 0;
-	c->floor_rgb[1] = 0;
-	c->floor_rgb[2] = 0;
-	map_head->prev = NULL;
-	map_head->next = NULL;
-	map_head->line = NULL;
-	list_head->prev = NULL;
-	list_head->next = NULL;
-	list_head->line = NULL;
-	c->map_i = NULL;
-	c->map_c = NULL;
+	ft_memset(c, 0, sizeof(t_cub_data));
+	ft_memset(map_head, 0, sizeof(t_node));
+	ft_memset(list_head, 0, sizeof(t_node));
 }

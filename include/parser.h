@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   parser.h                                           :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcaratti <vcaratti@student.s19.be>         +#+  +:+       +#+        */
+/*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 12:48:42 by vcaratti          #+#    #+#             */
-/*   Updated: 2025/06/11 12:26:45 by vcaratti         ###   ########.fr       */
+/*   Updated: 2025/06/12 13:51:08 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,14 @@
 # include "../libft/include/libft.h"
 # include "fcntl.h"
 # include "stdio.h"
+
+enum e_direction
+{
+	NORTH,
+	SOUTH,
+	WEST,
+	EAST
+};
 
 typedef struct s_node
 {
@@ -40,10 +48,7 @@ typedef struct s_cub_data
 	t_player_pars	player;
 	int				**map_i;
 	char			**map_c;
-	char			*so_texture;
-	char			*no_texture;
-	char			*we_texture;
-	char			*ea_texture;
+	char			*tex_paths[4];
 	int				ceiling_rgb[3];
 	int				floor_rgb[3];
 }	t_cub_data;

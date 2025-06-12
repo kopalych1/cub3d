@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 12:49:09 by vcaratti          #+#    #+#             */
-/*   Updated: 2025/06/12 10:43:07 by akostian         ###   ########.fr       */
+/*   Updated: 2025/06/12 13:51:39 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,8 +94,8 @@ static int	parsing_routine(char *path, t_cub_data *cub_data, t_node *list_head)
 	free_map_i(cub_data);
 	if (list_head->next)
 		return (set_error(cub_data, 4), 1);
-	if (!cub_data->so_texture || !cub_data->no_texture
-		|| !cub_data->ea_texture || !cub_data->we_texture)
+	if (!cub_data->tex_paths[NORTH] || !cub_data->tex_paths[SOUTH]
+		|| !cub_data->tex_paths[WEST] || !cub_data->tex_paths[EAST])
 		return (set_error(cub_data, 4), 1);
 	return (0);
 }

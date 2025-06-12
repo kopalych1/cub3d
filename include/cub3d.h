@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/18 14:55:52 by akostian          #+#    #+#             */
-/*   Updated: 2025/06/12 10:47:59 by akostian         ###   ########.fr       */
+/*   Updated: 2025/06/12 13:51:00 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,14 +34,6 @@
 
 # define KEY_PRESS_DISTANCE 0.5f
 # define KEY_TURN_RATE 15.0f
-
-enum e_direction
-{
-	NORTH,
-	SOUTH,
-	WEST,
-	EAST
-};
 
 /* ========== Math ========== */
 

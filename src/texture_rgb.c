@@ -3,10 +3,10 @@
 /*                                                        :::      ::::::::   */
 /*   texture_rgb.c                                      :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: vcaratti <vcaratti@student.s19.be>         +#+  +:+       +#+        */
+/*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/03/19 12:48:42 by vcaratti          #+#    #+#             */
-/*   Updated: 2025/06/10 13:57:22 by vcaratti         ###   ########.fr       */
+/*   Updated: 2025/06/12 13:52:08 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -49,13 +49,13 @@ int	process_texture(char *line, t_cub_data *cub_data)
 	if (ft_arr_len(line_split) != 2)
 		return (set_error(cub_data, 4), free_char_arr(line_split), 1);
 	if (!ft_strcmp(line_split[0], "SO"))
-		set_texture(cub_data, &cub_data->so_texture, line_split[1]);
+		set_texture(cub_data, &cub_data->tex_paths[SOUTH], line_split[1]);
 	else if (!ft_strcmp(line_split[0], "NO"))
-		set_texture(cub_data, &cub_data->no_texture, line_split[1]);
+		set_texture(cub_data, &cub_data->tex_paths[NORTH], line_split[1]);
 	else if (!ft_strcmp(line_split[0], "WE"))
-		set_texture(cub_data, &cub_data->we_texture, line_split[1]);
+		set_texture(cub_data, &cub_data->tex_paths[WEST], line_split[1]);
 	else if (!ft_strcmp(line_split[0], "EA"))
-		set_texture(cub_data, &cub_data->ea_texture, line_split[1]);
+		set_texture(cub_data, &cub_data->tex_paths[EAST], line_split[1]);
 	free(line_split[0]);
 	free(line_split);
 	return (cub_data->error);

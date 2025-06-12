@@ -6,7 +6,7 @@
 /*   By: akostian <akostian@student.s19.be>         +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/17 00:05:42 by akostian          #+#    #+#             */
-/*   Updated: 2025/06/11 12:22:51 by vcaratti         ###   ########.fr       */
+/*   Updated: 2025/06/12 14:08:34 by akostian         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,21 +24,9 @@ void	destroy_tex(t_game *game)
 		mlx_destroy_image(game->mlx_ptr, game->tex[EAST].p);
 }
 
-char	*get_next_texture(t_cub_data *cub_data, int i)
-{
-	if (i == 0)
-		return (cub_data->so_texture);
-	if (i == 1)
-		return (cub_data->no_texture);
-	if (i == 2)
-		return (cub_data->ea_texture);
-	if (i == 3)
-		return (cub_data->we_texture);
-	return (NULL);
-}
-
 int	load_tex(t_game *game, t_cub_data *cub_data)
 {
+	const char	*err = "Error: Loading textures\n";
 	int			i;
 
 	i = -1;
@@ -46,10 +34,15 @@ int	load_tex(t_game *game, t_cub_data *cub_data)
 	while (++i < 4)
 	{
 		game->tex[i].p = mlx_xpm_file_to_image(game->mlx_ptr,
-				get_next_texture(cub_data, i),
+				cub_data->tex_paths[i],
 				&(game->tex[i].width), &(game->tex[i].height));
 		if (!game->tex[i].p)
+		{
+			if (write(2, err, ft_strlen(err)))
+			{
+			}
 			return (destroy_tex(game), 1);
+		}
 	}
 	return (0);
 }
